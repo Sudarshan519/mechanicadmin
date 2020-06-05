@@ -1,16 +1,13 @@
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import 'package:mechanicadmin/models/user.dart';
-import 'package:mechanicadmin/pages/homepage.dart';
-
-import 'package:mechanicadmin/pages/profile_page.dart';
-import 'package:mechanicadmin/pages/repairPage.dart';
-
+import 'package:mechanicadmin/user/models/user.dart';
+import 'package:mechanicadmin/user/pages/homepage.dart';
+import 'package:mechanicadmin/user/pages/profile_page.dart';
+import 'package:mechanicadmin/user/pages/repairs.dart';
 
 class MainScreen extends StatefulWidget {
-  final String username;
-  MainScreen(this.username);
+  final FirebaseUser user;
+  MainScreen(this.user);
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -21,18 +18,15 @@ class _MainScreenState extends State<MainScreen> {
   List<Widget> pages;
   Widget currentPage;
   HomePage homePage;
-  RepairPage repairPage;
-  //SignupPage signupPage;
+  Repairs repairPage;
   ProfilePage profilePage;
   bool searchpressed = false;
   User get user => null;
   @override
   void initState() {
     super.initState();
-    homePage = HomePage(widget.username);
-
-    repairPage = RepairPage();
-    //signupPage = SignupPage();
+    homePage = HomePage(widget.user);
+    repairPage = Repairs();
     profilePage = ProfilePage();
     pages = [homePage, repairPage, profilePage];
     currentPage = homePage;
@@ -41,8 +35,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Colors.white,
         body: currentPage,
         bottomNavigationBar: BottomNavigationBar(
+            backgroundColor: Colors.white,
+            elevation: 0.0,
             currentIndex: currentTabIndex,
             onTap: (int index) {
               setState(() {
@@ -56,8 +53,6 @@ class _MainScreenState extends State<MainScreen> {
                   icon: Icon(Icons.home), title: Text("Home")),
               BottomNavigationBarItem(
                   icon: Icon(Icons.build), title: Text("Repairs")),
-              // BottomNavigationBarItem(
-              //     icon: Icon(Icons.favorite), title: Text("favourites")),
               BottomNavigationBarItem(
                   icon: Icon(Icons.person), title: Text("Profile")),
             ]));

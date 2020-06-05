@@ -150,7 +150,8 @@ class AuthService {
             .setData({
           'id': firebaseUser.uid,
           'username': firebaseUser.displayName,
-          'profilePicture': firebaseUser.photoUrl
+          'profilePicture': firebaseUser.photoUrl,
+          //'usertype':firebaseUser.usertype,
         });
         await preferences.setString('id', firebaseUser.uid);
         await preferences.setString('username', firebaseUser.displayName);
@@ -175,7 +176,6 @@ class AuthService {
       await preferences.setString('id', null);
       await preferences.setString('username', null);
       await preferences.setString('photoUrl', null);
-      
     });
   }
 }

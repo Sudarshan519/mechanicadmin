@@ -42,6 +42,7 @@ dependencies:
   platform_maps_flutter:
   firebase_storage:
   firebase_database:
+  url_launcher:
 
   firebase_core: ^0.4.0+9
 

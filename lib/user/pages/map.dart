@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:mechanicadmin/models/marker.dart';
+import 'package:mechanicadmin/user/models/shop.dart';
 import 'package:platform_maps_flutter/platform_maps_flutter.dart';
-
 
 class MapPage extends StatefulWidget {
   final Position position;
   final int selectedDistance;
-  MapPage(this.position, this.selectedDistance);
+  final bool request;
+  final List<Shop> shops;
+  MapPage(this.position, this.selectedDistance, this.request, this.shops);
 
   @override
   _MapPageState createState() => _MapPageState();
@@ -15,7 +16,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   BitmapDescriptor myicon, shopicon;
-  List<ShopLocation> _marker = locations;
+  List<Shop> shops;
 
   @override
   void initState() {
@@ -39,8 +40,8 @@ class _MapPageState extends State<MapPage> {
       position: LatLng(context.latitude, context.longitude),
       consumeTapEvents: true,
       infoWindow: InfoWindow(
-        title: '${context.title}',
-        snippet: "${context.description}",
+        title: '${context.address}',
+        snippet: "${context.shopName}",
       ),
       onTap: () async {
         //print("Marker tapped");
@@ -48,21 +49,21 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  Marker _buildMechanicMarker(context, icon) {
-    return Marker(
-      markerId: MarkerId(''),
-      icon: icon,
-      position: LatLng(context.latitude, context.longitude),
-      consumeTapEvents: true,
-      infoWindow: InfoWindow(
-        title: '${context.title}',
-        snippet: "${context.description}",
-      ),
-      onTap: () async {
-        //print("Marker tapped");
-      },
-    );
-  }
+  // Marker _buildMechanicMarker(context, icon) {
+  //   return Marker(
+  //     markerId: MarkerId(''),
+  //     icon: icon,
+  //     position: LatLng(context.latitude, context.longitude),
+  //     consumeTapEvents: true,
+  //     infoWindow: InfoWindow(
+  //       title: '${context.title}',
+  //       snippet: "${context.description}",
+  //     ),
+  //     onTap: () async {
+  //       //print("Marker tapped");
+  //     },
+  //   );
+  // }
 
   Polyline _buildPolyine(context, icon) {
     return Polyline(
@@ -85,33 +86,35 @@ class _MapPageState extends State<MapPage> {
         ImageConfiguration(devicePixelRatio: 2.5), 'images/mechanic1.png');
     setState(() {
       //_marker.clear();
-      _marker = locations;
+      shops = widget.shops;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return PlatformMap(
-      polylines: Set<Polyline>.of([
-        _buildPolyine(_marker[widget.selectedDistance], shopicon),
-        // Polyline(
-        //     polylineId: PolylineId('a'),
-        //     color: Colors.blueAccent,
-        //     points: [
-        //       LatLng(_originLatitude, _originLongitude),
-        //       LatLng(_marker[0].latitude, _marker[0].longitude)
-        //     ])
-      ]),
+      polylines: widget.request
+          ? Set<Polyline>.of([
+              _buildPolyine(widget.shops[widget.selectedDistance], shopicon),
+              // Polyline(
+              //     polylineId: PolylineId('a'),
+              //     color: Colors.blueAccent,
+              //     points: [
+              //       LatLng(_originLatitude, _originLongitude),
+              //       LatLng(_marker[0].latitude, _marker[0].longitude)
+              //     ])
+            ])
+          : null,
       initialCameraPosition: CameraPosition(
         target: LatLng(widget.position.latitude, widget.position.longitude),
-        zoom: 17.0,
+        zoom: 18.0,
       ),
       markers: Set<Marker>.of(
         [
-          for (int i = 0; i != _marker.length; i++)
-            _buildShopMarker(_marker[i], shopicon),
-            for (int i = 0; i != _marker.length; i++)
-            _buildMechanicMarker(_marker[i], shopicon),
+          for (int i = 0; i != widget.shops.length; i++)
+            _buildShopMarker(widget.shops[i], shopicon),
+          // for (int i = 0; i != _marker.length; i++)
+          // _buildMechanicMarker(_marker[i], shopicon),
           Marker(
             markerId: MarkerId('Broke Vehicle'),
             icon: myicon,
@@ -146,7 +149,7 @@ class _MapPageState extends State<MapPage> {
                   target: LatLng(
                       widget.position.latitude, widget.position.longitude),
                   tilt: 30.0,
-                  zoom: 17,
+                  zoom: 18,
                 ),
               ),
             );

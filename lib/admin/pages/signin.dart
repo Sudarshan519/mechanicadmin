@@ -5,11 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:mechanicadmin/signup.dart';
 
-import 'package:mechanicadmin/pages/mainscreen.dart';
-import 'package:mechanicadmin/pages/signup.dart';
+import 'package:mechanicadmin/user/pages/mainscreen.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 class SignInPage extends StatefulWidget {
   @override
@@ -47,14 +48,18 @@ class _SignInPageState extends State<SignInPage> {
           validator: (val) {
             if (val.length < 6) {
               return 'Enter a password 6+ char long';
-            } else if (val.isEmpty) return 'Cannot be empty';
-            else return '';
-
-            // onChanged:
-            // (val) {
-            //   print(val);
-            //   setState(() => {email = val});
-            // };
+            } else if (val.isEmpty)
+              return 'Cannot be empty';
+            else
+              return '';
+          },
+          onChanged: (v) {
+            print(v);
+            setState(() {
+              email = v;
+            });
+            print(email);
+            return '';
           },
         ),
       ),
@@ -72,8 +77,10 @@ class _SignInPageState extends State<SignInPage> {
             if (val.length < 6) {
               return 'Enter a password 6+ char long';
             }
-            if (val.isEmpty) return 'Enter a password of valid length';
-            else return '';
+            if (val.isEmpty)
+              return 'Enter a password of valid length';
+            else
+              return '';
           },
           onChanged: (val) {
             print(val);
@@ -100,28 +107,11 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  // void isSignedIn() async {
-  //   setState(() {
-  //     loading = true;
-  //   });
-  //   preferences = await SharedPreferences.getInstance();
-  //   isLoggedin = await googleSignIn.isSignedIn();
-  //   if (isLoggedin)
-  //     Navigator.of(context)
-  //         .pushReplacement(MaterialPageRoute(builder: (_) => MainScreen('')));
-  //   else {
-  //     print('signin failed');
-  //   }
-  //   setState(() {
-  //     loading = false;
-  //   });
-  // }
-
   @override
   void initState() {
     super.initState();
 
-   // isSignedIn();
+    // isSignedIn();
   }
 
   @override
@@ -131,7 +121,7 @@ class _SignInPageState extends State<SignInPage> {
       body: Form(
         key: _formKey,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(20.0),
@@ -151,15 +141,24 @@ class _SignInPageState extends State<SignInPage> {
                 ],
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  loading = true;
-                });
+            InkWell(
+              onTap: () async {
+                print(email);
+                print(password);
+                AuthResult authResult =
+                    await firebaseAuth.signInWithEmailAndPassword(
+                        email: email, password: password);
+                if (authResult != null) {
+                  FirebaseUser firebaseUser = authResult.user;
 
-                if (_formKey.currentState.validate()) {
-                  signIn();
+                  Fluttertoast.showToast(
+                      msg: "Login was successful ${firebaseUser.displayName}");
+                  Navigator.push(context, MaterialPageRoute(builder: (_) {
+                    return MainScreen(firebaseUser);
+                  }));
                 }
+                else 
+                Fluttertoast.showToast(msg: 'Failed login');
               },
               child: Container(
                 height: 50,
@@ -175,7 +174,6 @@ class _SignInPageState extends State<SignInPage> {
                 )),
               ),
             ),
-            SizedBox(height: 20),
             GestureDetector(
               onTap: () {
                 //signIn();
@@ -196,7 +194,6 @@ class _SignInPageState extends State<SignInPage> {
                 )),
               ),
             ),
-            SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -207,7 +204,7 @@ class _SignInPageState extends State<SignInPage> {
                     )),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_){
+                    Navigator.push(context, MaterialPageRoute(builder: (_) {
                       return SignUpPage();
                     }));
                   },
@@ -226,42 +223,49 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   Future signIn() async {
-    AuthResult authResult;
-    await firebaseAuth
-        .signInWithEmailAndPassword(email: email, password: password)
-        .then((value) => authResult);
-    FirebaseUser firebaseUser = authResult.user;
-    setState(() {
-      loading = false;
-    });
-    if (firebaseUser != null) {
-      final QuerySnapshot result = await Firestore.instance
-          .collection("users")
-          .where("id", isEqualTo: firebaseUser.uid)
-          .getDocuments();
-      final List<DocumentSnapshot> documents = result.documents;
-      if (documents.length == 0) {
-        //insert user to collection
-        Firestore.instance
-            .collection('user')
-            .document(firebaseUser.uid)
-            .setData({
-          'id': firebaseUser.uid,
-          'username': firebaseUser.displayName,
-          'profilePicture': firebaseUser.photoUrl
-        });
+    AuthResult authResult =
+                    await firebaseAuth.signInWithEmailAndPassword(
+                        email: email, password: password);
+                if (authResult != null) {
+                  FirebaseUser firebaseUser = authResult.user;
 
         await preferences.setString('id', firebaseUser.uid);
         await preferences.setString('username', firebaseUser.displayName);
         await preferences.setString('photoUrl', firebaseUser.photoUrl);
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (_) => MainScreen(firebaseUser.displayName)));
-      } else {
-        await preferences.setString('id', documents[0]['id']);
-        await preferences.setString('username', documents[0]['displayName']);
-        await preferences.setString('photoUrl', documents[0]['photoUrl']);
-      }
-    }
+                  Fluttertoast.showToast(
+                      msg: "Login was successful ${firebaseUser.displayName}");
+                  Navigator.push(context, MaterialPageRoute(builder: (_) {
+                    return MainScreen(firebaseUser);
+                  }));
+
+      // final QuerySnapshot result = await Firestore.instance
+      //     .collection("users")
+      //     .where("id", isEqualTo: firebaseUser.uid)
+      //     .getDocuments();
+      // final List<DocumentSnapshot> documents = result.documents;
+      // if (documents.length == 0) {
+      //   //insert user to collection
+      //   Firestore.instance
+      //       .collection('user')
+      //       .document(firebaseUser.uid)
+      //       .setData({
+      //     'id': firebaseUser.uid,
+      //     'username': firebaseUser.displayName,
+      //     'profilePicture': firebaseUser.photoUrl
+      //   });
+
+      //   await preferences.setString('id', firebaseUser.uid);
+      //   await preferences.setString('username', firebaseUser.displayName);
+      //   await preferences.setString('photoUrl', firebaseUser.photoUrl);
+      // } else {
+      //   await preferences.setString('id', documents[0]['id']);
+      //   await preferences.setString('username', documents[0]['displayName']);
+      //   await preferences.setString('photoUrl', documents[0]['photoUrl']);
+
+      // }
+
+    
+  }
   }
 
   Future handleSignIn() async {
@@ -298,7 +302,8 @@ class _SignInPageState extends State<SignInPage> {
             .setData({
           'id': firebaseUser.uid,
           'username': firebaseUser.displayName,
-          'profilePicture': firebaseUser.photoUrl
+          'profilePicture': firebaseUser.photoUrl,
+        //'usertype':firebaseUser.usertype,
         });
         await preferences.setString('id', firebaseUser.uid);
         await preferences.setString('username', firebaseUser.displayName);
@@ -312,8 +317,7 @@ class _SignInPageState extends State<SignInPage> {
       Fluttertoast.showToast(
           msg: "Login was successful ${firebaseUser.displayName}");
       Navigator.push(context, MaterialPageRoute(builder: (_) {
-        return
-        MainScreen(firebaseUser.displayName);
+        return MainScreen(firebaseUser);
       }));
       setState(() {
         loading = false;

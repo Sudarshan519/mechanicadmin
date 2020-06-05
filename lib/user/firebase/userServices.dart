@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mechanicadmin/models/shop.dart';
+import 'package:mechanicadmin/user/models/shop.dart';
 
 class ShopServices {
   Firestore firestore = Firestore.instance;

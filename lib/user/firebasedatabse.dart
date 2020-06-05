@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
-import 'package:mechanicadmin/pages/mainscreen.dart';
+import 'package:mechanicadmin/user/pages/mainscreen.dart';
 
 // Future<void> main() async {
 //   WidgetsFlutterBinding.ensureInitialized();
@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-
+FirebaseUser user;
   DatabaseError _error;
   final _formKey = GlobalKey<FormState>();
 
@@ -164,30 +164,32 @@ class _MyHomePageState extends State<MyHomePage> {
                     if (_formKey.currentState.validate()) {
                       FirebaseAuth.instance.createUserWithEmailAndPassword(
                           email: emailController.text,
-                          password: passwordController.text);
+                          password: passwordController.text).then((value) {
+                            setState((){
+                              user=value.user;
+                            });
+                          });
                       _increment(<String, String>{
                         'username': '${usernameController.text}',
                         'email': '${emailController.text}',
                         'id': '$_counter'
                       });
-                      Navigator.push(context, MaterialPageRoute(builder: (_){return MainScreen('');}));
+                      Navigator.push(context, MaterialPageRoute(builder: (_){return MainScreen(user);}));
                     }
                   },
                 ),
               ],
             ),
           ),
-          Flexible(
-            child: Center(
-              child: _error == null
-                  ? Text(
-                      'Button tapped $_counter time${_counter == 1 ? '' : 's'}.\n\n'
-                      'This includes all devices, ever.',
-                    )
-                  : Text(
-                      'Error retrieving button tap count:\n${_error.message}',
-                    ),
-            ),
+          Center(
+            child: _error == null
+                ? Text(
+                    'Button tapped $_counter time${_counter == 1 ? '' : 's'}.\n\n'
+                    'This includes all devices, ever.',
+                  )
+                : Text(
+                    'Error retrieving button tap count:\n${_error.message}',
+                  ),
           ),
           ListTile(
             leading: Checkbox(
@@ -200,31 +202,29 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             title: const Text('Anchor to bottom'),
           ),
-          Flexible(
-            child: FirebaseAnimatedList(
-              key: ValueKey<bool>(_anchorToBottom),
-              query: _messagesRef,
-              reverse: _anchorToBottom,
-              sort: _anchorToBottom
-                  ? (DataSnapshot a, DataSnapshot b) => b.key.compareTo(a.key)
-                  : null,
-              itemBuilder: (BuildContext context, DataSnapshot snapshot,
-                  Animation<double> animation, int index) {
-                return SizeTransition(
-                  sizeFactor: animation,
-                  child: ListTile(
-                    trailing: IconButton(
-                      onPressed: () =>
-                          _messagesRef.child(snapshot.key).remove(),
-                      icon: Icon(Icons.delete),
-                    ),
-                    title: Text(
-                      "$index: ${snapshot.value.toString()} ",
-                    ),
+          FirebaseAnimatedList(
+            key: ValueKey<bool>(_anchorToBottom),
+            query: _messagesRef,
+            reverse: _anchorToBottom,
+            sort: _anchorToBottom
+                ? (DataSnapshot a, DataSnapshot b) => b.key.compareTo(a.key)
+                : null,
+            itemBuilder: (BuildContext context, DataSnapshot snapshot,
+                Animation<double> animation, int index) {
+              return SizeTransition(
+                sizeFactor: animation,
+                child: ListTile(
+                  trailing: IconButton(
+                    onPressed: () =>
+                        _messagesRef.child(snapshot.key).remove(),
+                    icon: Icon(Icons.delete),
                   ),
-                );
-              },
-            ),
+                  title: Text(
+                    "$index: ${snapshot.value.toString()} ",
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
