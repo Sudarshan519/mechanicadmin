@@ -15,6 +15,10 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 <div>
+<span>
+<img src="home" height=380 width=280>
+</span>
 <img src="signin" height=380 width=280>
-</div>
 <img src="output.gif" height=380 width=280 >
+</div>
+
