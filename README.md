@@ -18,7 +18,7 @@ samples, guidance on mobile development, and a full API reference.
 <span>
 <img src="home" height=380 width=280>
 </span>
-<img src="signin" height=380 width=280>
+<span><img src="signin" height=380 width=280></span>
 <img src="output.gif" height=380 width=280 >
 </div>
 
