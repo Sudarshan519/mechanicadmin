@@ -21,13 +21,13 @@ class _MainScreenState extends State<MainScreen> {
   Repairs repairPage;
   ProfilePage profilePage;
   bool searchpressed = false;
-  User get user => null;
+  //User get user => null;
   @override
   void initState() {
     super.initState();
     homePage = HomePage(widget.user);
     repairPage = Repairs();
-    profilePage = ProfilePage();
+    profilePage = ProfilePage(widget.user);
     pages = [homePage, repairPage, profilePage];
     currentPage = homePage;
   }

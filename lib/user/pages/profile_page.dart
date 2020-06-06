@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mechanicadmin/services/authServices.dart';
 import 'package:mechanicadmin/signin.dart';
@@ -5,6 +6,9 @@ import 'package:mechanicadmin/widgets/custom_list_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
+  final FirebaseUser user;
+
+ ProfilePage(this.user);
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -45,7 +49,6 @@ class _ProfilePageState extends State<ProfilePage> {
           SizedBox(
             height: 20,
           ),
-  
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -62,7 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     //     offset: Offset(0, 4),
                     //     color: Colors.black38,
                     //   ),
-                   // ],
+                    // ],
                     image: DecorationImage(
                       image: AssetImage(
                         "images/a.jpg",
@@ -76,14 +79,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    '',
+                    widget.user.displayName,
                     style: TextStyle(
                       fontSize: 15.0,
                     ),
                   ),
                   SizedBox(height: 10),
                   Text(
-                    "+221",
+                    widget.user.email,
                     style: TextStyle(color: Colors.grey, fontSize: 16),
                   ),
                   SizedBox(

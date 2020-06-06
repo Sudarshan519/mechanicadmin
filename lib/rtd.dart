@@ -48,15 +48,50 @@ class _FirebaseAppState extends State<FirebaseApp> {
               itemBuilder: (_, DataSnapshot snapshot,
                   Animation<double> animation, int index) {
                 return ListTile(
-                  leading: Icon(Icons.message),
-                  title: Text(items[index].title),
-                  subtitle: Text(items[index].body),
-                  trailing: InkWell(
-                      onTap: () {
-                        itemRef.child(snapshot.key).remove();
-                      },
-                      child: Icon(Icons.delete)),
-                );
+                    leading: Icon(Icons.message),
+                    title: Text(items[index].title),
+                    subtitle: Text(items[index].body),
+                    trailing: Column(
+                      children: <Widget>[
+                        InkWell(
+                            onTap: () {
+                              // itemRef.child(snapshot.key).reference();
+                              item = Item.fromSnapshot(snapshot);
+                              showDialog(
+                                  context: context,
+                                  child: AlertDialog(
+                                    title: Column(children: <Widget>[
+                                      TextFormField(
+                                        initialValue: item.title,
+                                        onChanged: (v) {
+                                          item.title = v;
+                                        },
+                                      ),
+                                      TextFormField(
+                                        initialValue: item.body,
+                                        onChanged: (v) {
+                                          item.body = v;
+                                        },
+                                      ),
+                                      RaisedButton(
+                                        onPressed: () {
+                                          itemRef
+                                              .child(snapshot.key)
+                                              .update(item.toJson());
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                    ]),
+                                  ));
+                            },
+                            child: Icon(Icons.edit)),
+                        InkWell(
+                            onTap: () {
+                              itemRef.child(snapshot.key).remove();
+                            },
+                            child: Icon(Icons.delete)),
+                      ],
+                    ));
               },
             ),
           )
@@ -78,8 +113,7 @@ class _FirebaseAppState extends State<FirebaseApp> {
   void _onEntryChanged(Event event) {
     setState(() {
       var old = items.singleWhere((element) {
-        element.key = event.snapshot.key;
-        return null;
+        return element.key == event.snapshot.key;
       });
       setState(() {
         items[items.indexOf(old)] = Item.fromSnapshot(event.snapshot);

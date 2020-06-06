@@ -36,6 +36,7 @@ dependencies:
   bloc_pattern:
   rxdart:
   carousel_pro:
+  haversine: ^1.0.2
   geolocator:
   image_picker: ^0.6.5+3
   path_provider:

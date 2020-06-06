@@ -307,22 +307,22 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  Future signIn() async {
-    AuthResult authResult = await firebaseAuth.signInWithEmailAndPassword(
-        email: email, password: password);
-    if (authResult != null) {
-      FirebaseUser firebaseUser = authResult.user;
+  // Future signIn() async {
+  //   AuthResult authResult = await firebaseAuth.signInWithEmailAndPassword(
+  //       email: email, password: password);
+  //   if (authResult != null) {
+  //     FirebaseUser firebaseUser = authResult.user;
 
-      await preferences.setString('id', firebaseUser.uid);
-      await preferences.setString('username', firebaseUser.displayName);
-      await preferences.setString('photoUrl', firebaseUser.photoUrl);
-      Fluttertoast.showToast(
-          msg: "Login was successful ${firebaseUser.displayName}");
-      Navigator.push(context, MaterialPageRoute(builder: (_) {
-        return MainScreen(firebaseUser);
-      }));
-    }
-  }
+  //     await preferences.setString('id', firebaseUser.uid);
+  //     await preferences.setString('username', firebaseUser.displayName);
+  //     await preferences.setString('photoUrl', firebaseUser.photoUrl);
+  //     Fluttertoast.showToast(
+  //         msg: "Login was successful ${firebaseUser.displayName}");
+  //     Navigator.push(context, MaterialPageRoute(builder: (_) {
+  //       return MainScreen(firebaseUser);
+  //     }));
+  //   }
+  // }
 
   Future handleSignIn() async {
     preferences = await SharedPreferences.getInstance();

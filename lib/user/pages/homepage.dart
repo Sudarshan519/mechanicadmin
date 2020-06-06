@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:haversine/haversine.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mechanicadmin/admin/pages/signin.dart';
 import 'package:mechanicadmin/services/authServices.dart';
@@ -21,23 +24,25 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Position myPosition = Position();
+  Position myPosition;
   bool isLoading = true;
   String image = "images/a.jpg";
-  List<Shop> shops = [];
+  List<Shop> shops;
   double distanceInMeters = 99999999;
   BitmapDescriptor myicon;
   BitmapDescriptor shopicon;
   bool carwashselected = false;
   bool request = false;
-  int selectedDistance;
+  int selectedDistance = 1;
   var arr = [];
   var raa = [];
 
   @override
   void initState() {
     super.initState();
+
     getshops();
+   // getLocation();
   }
 
   @override
@@ -54,7 +59,7 @@ class _HomePageState extends State<HomePage> {
                 children: <Widget>[
                   Container(
                       height: MediaQuery.of(context).size.height * .30,
-                      child: shops.isNotEmpty
+                      child: shops != null||myPosition!=null
                           ? MapPage(
                               myPosition, selectedDistance, request, shops)
                           : Center(child: CircularProgressIndicator())),
@@ -107,16 +112,14 @@ class _HomePageState extends State<HomePage> {
                         child: Container(
                           height: 40,
                           width: MediaQuery.of(context).size.width * .5,
-                          child: request
-                              ? Center(child: CircularProgressIndicator())
-                              : Text(
-                                  'Order Repair',
-                                  style: heading,
-                                  textAlign: TextAlign.center,
-                                ),
+                          child: Text(
+                            'Order Repair',
+                            style: heading,
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
@@ -172,16 +175,16 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                       SizedBox(
-                        height: 30,
+                        height: 10,
                       ),
                       Text(
                         'Repairs Shops Nearby',
                         style: heading,
                       ),
                       Container(
-                          height: MediaQuery.of(context).size.height * .30,
+                          height: MediaQuery.of(context).size.height * .27,
                           color: Colors.white,
-                          child: shops.isNotEmpty
+                          child: shops != null
                               ? ListView.builder(
                                   scrollDirection: Axis.vertical,
                                   physics: BouncingScrollPhysics(),
@@ -196,10 +199,12 @@ class _HomePageState extends State<HomePage> {
                                         '${shops[i].address}',
                                         style: heading,
                                       ),
-                                      subtitle: Text(
-                                        '${arr[i].toStringAsFixed(2)} m ahead',
-                                        style: subtitle,
-                                      ),
+                                      subtitle: arr[i] != null
+                                          ? Text(
+                                              '${arr[i].toStringAsFixed(2)} m ahead',
+                                              style: subtitle,
+                                            )
+                                          : Text(''),
                                     );
                                   },
                                 )
@@ -228,7 +233,7 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 Icon(
                   Icons.local_car_wash,
-                  size: 90,
+                  size: 50,
                   color: Colors.blueGrey,
                 ),
                 Text(
@@ -255,16 +260,16 @@ class _HomePageState extends State<HomePage> {
               for (int i = 0; i < 40; i++)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Icon(
                       Icons.local_gas_station,
-                      size: 90,
+                      size: 50,
                       color: Colors.blueGrey,
                     ),
                     Text(
-                      'Gas station',
-                      style: heading,
+                      'Fuels station',
+                      style: subtitle,
                     ),
                   ],
                 ),
@@ -280,9 +285,6 @@ class _HomePageState extends State<HomePage> {
       child: ListView(
         children: <Widget>[
           UserAccountsDrawerHeader(
-            // decoration: BoxDecoration(
-            //   image:DecorationImage(image: AssetImage('images/b.jpg',),fit:BoxFit.fill)
-            // ),
             accountName: Text(
               widget.user.displayName,
               style: title.copyWith(color: Colors.white),
@@ -365,27 +367,49 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void getDistance(context, i) async {
-    await Geolocator()
-        .distanceBetween(myPosition.latitude, myPosition.longitude,
-            context.latitude, context.longitude)
-        .then((value) {
-      if (value >= distanceInMeters)
-        arr[i] = value;
-      else {
-        setState(() {
-          distanceInMeters = value;
+  getDistance() async {
+    //final harvesine =
+    for (int i = 0; i != shops.length; i++) {
+      double distance = new Haversine.fromDegrees(
+              latitude1: myPosition.latitude,
+              longitude1: myPosition.longitude,
+              latitude2: shops[i].latitude,
+              longitude2: shops[i].longitude)
+          .distance();
+      setState(() {
+        arr.length = shops.length;
+        arr[i] = distance;
+        if (distance < distanceInMeters) {
+          distanceInMeters = distance;
           selectedDistance = i;
-          arr[i] = value;
-          raa[i]=value;
-          isLoading = false;
-        });
-      }
-      raa.sort();
-      
-      print(raa);
-    });
+        }
+      });
+    }
   }
+
+  // getDistance() async {
+  //   for (int i = 0; i != shops.length; i++) {
+  //     await Geolocator()
+  //         .distanceBetween(myPosition.latitude, myPosition.longitude,
+  //             shop[i].latitude, shop[i].longitude)
+  //         .then((value) {
+  //       if (value >= distanceInMeters)
+  //         arr[i] = value;
+  //       else {
+  //         setState(() {
+  //           distanceInMeters = value;
+  //           selectedDistance = i;
+  //           arr[i] = value;
+  //           raa[i] = value;
+  //           isLoading = false;
+  //         });
+  //       }
+  //       raa.sort();
+
+  //       print(raa);
+  //     });
+  //   }
+  // }
 
   getLocation() async {
     await Geolocator()
@@ -394,10 +418,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         myPosition = value;
       });
-      if (myPosition.latitude != null)
-        for (int i = 0; i != shops.length; i++) {
-          getDistance(shops[i], i);
-        }
+      getDistance();
     });
   }
 
@@ -406,7 +427,7 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             shops = value;
             arr.length = shops.length;
-            raa.length=shops.length;
+            raa.length = shops.length;
           })
         });
     getLocation();
@@ -510,7 +531,7 @@ class _HomePageState extends State<HomePage> {
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
-          title: new Text("About MechanicFinder"),
+          title: new Text("Privacy Page"),
           content: new Text(
               "The mechanic finder app is an mobile app product which aims to fast and relaible recovery of vechile brokedown over road and provides a reliable service in managing them."),
           actions: <Widget>[
@@ -546,6 +567,9 @@ class _HomePageState extends State<HomePage> {
             new FlatButton(
               child: new Text("ok"),
               onPressed: () {
+                setState(() {
+                  request = true;
+                });
                 showDialog(
                     context: context,
                     builder: (_) {

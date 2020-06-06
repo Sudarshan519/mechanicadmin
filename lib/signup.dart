@@ -6,7 +6,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mechanicadmin/business/businesshome.dart';
-
 import 'package:mechanicadmin/signin.dart';
 import 'package:mechanicadmin/user/pages/mainscreen.dart';
 import 'package:mechanicadmin/widgets/common.dart';
@@ -23,9 +22,8 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  String _selectedItem = 'firebaseUser';
-  int _counter;
-  DatabaseReference _counterRef;
+  String _selectedItem = 'user';
+
   DatabaseReference _messagesRef;
   StreamSubscription<Event> _counterSubscription;
   StreamSubscription<Event> _messagesSubscription;
@@ -45,7 +43,6 @@ class _SignUpPageState extends State<SignUpPage> {
     usertype = Usertype('', 'admin');
     databaseRef = database.reference().child('users');
 
-    _counterRef = FirebaseDatabase.instance.reference().child('counter');
 
     // final FirebaseDatabase database = FirebaseDatabase(app: widget.app);
     _messagesRef = database.reference().child('messages');
@@ -53,23 +50,23 @@ class _SignUpPageState extends State<SignUpPage> {
       Fluttertoast.showToast(
           msg: 'Connected to second database and read ${snapshot.value}');
     });
-    database.setPersistenceEnabled(true);
-    database.setPersistenceCacheSizeBytes(10000000);
-    _counterRef.keepSynced(true);
-    _counterSubscription = _counterRef.onValue.listen((Event event) {
-      setState(() {
-        _counter = event.snapshot.value ?? 0;
-      });
-    }, onError: (Object o) {
-      setState(() {});
-    });
-    _messagesSubscription =
-        _messagesRef.limitToLast(10).onChildAdded.listen((Event event) {
-      print('Child added: ${event.snapshot.value}');
-    }, onError: (Object o) {
-      final DatabaseError error = o;
-      print('Error: ${error.code} ${error.message}');
-    });
+    // database.setPersistenceEnabled(true);
+    // database.setPersistenceCacheSizeBytes(10000000);
+    // _counterRef.keepSynced(true);
+    // _counterSubscription = _counterRef.onValue.listen((Event event) {
+    //   setState(() {
+    //     _counter = event.snapshot.value ?? 0;
+    //   });
+    // }, onError: (Object o) {
+    //   setState(() {});
+    // });
+    // _messagesSubscription =
+    //     _messagesRef.limitToLast(10).onChildAdded.listen((Event event) {
+    //   print('Child added: ${event.snapshot.value}');
+    // }, onError: (Object o) {
+    //   final DatabaseError error = o;
+    //   print('Error: ${error.code} ${error.message}');
+    // });
   }
 
   @override
@@ -79,23 +76,6 @@ class _SignUpPageState extends State<SignUpPage> {
     _counterSubscription.cancel();
   }
 
-  Future<void> _increment(Map value) async {
-    // Increment counter in transaction.
-    final TransactionResult transactionResult =
-        await _counterRef.runTransaction((MutableData mutableData) async {
-      mutableData.value = (mutableData.value ?? 0) + 1;
-      return mutableData;
-    });
-
-    if (transactionResult.committed) {
-      _messagesRef.push().set(value);
-    } else {
-      print('Transaction not committed.');
-      if (transactionResult.error != null) {
-        print(transactionResult.error.message);
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -186,10 +166,10 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                         DropdownMenuItem(
                           child: Text(
-                            'firebaseUser',
+                            'user',
                             style: heading,
                           ),
-                          value: 'firebaseUser',
+                          value: 'user',
                         ),
                         DropdownMenuItem(
                           child: Text(
