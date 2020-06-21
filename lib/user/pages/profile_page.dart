@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mechanicadmin/services/authServices.dart';
 import 'package:mechanicadmin/signin.dart';
+import 'package:mechanicadmin/widgets/common.dart';
 import 'package:mechanicadmin/widgets/custom_list_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -41,11 +42,24 @@ class _ProfilePageState extends State<ProfilePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           SizedBox(height: 30),
-          Text(
-            "Profile",
-            style:
-                textStyle.copyWith(fontSize: 32, fontWeight: FontWeight.bold),
-          ),
+          
+          Row(children: <Widget>[
+CircleAvatar(backgroundImage: AssetImage('images/a.jpg'),
+),
+Column(children: <Widget>[
+  Text(widget.user.email)
+],),
+Icon(Icons.settings)
+          ],),
+          Row(children: <Widget>[
+            Icon(Icons.arrow_forward_ios)
+
+          ],),
+          // Text(
+          //   "Profile",
+          //   style:
+          //       textStyle.copyWith(fontSize: 32, fontWeight: FontWeight.bold),
+          // ),
           SizedBox(
             height: 20,
           ),
@@ -80,14 +94,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: <Widget>[
                   Text(
                     widget.user.displayName,
-                    style: TextStyle(
-                      fontSize: 15.0,
-                    ),
+                    style:heading,
                   ),
                   SizedBox(height: 10),
                   Text(
                     widget.user.email,
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                  softWrap: true,
+                    style: subtitle.copyWith(fontSize:18)
                   ),
                   SizedBox(
                     height: 10,

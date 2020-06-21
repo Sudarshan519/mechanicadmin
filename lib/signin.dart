@@ -25,12 +25,11 @@ class _SignInPageState extends State<SignInPage> {
   final GoogleSignIn googleSignIn = new GoogleSignIn();
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
+  DatabaseReference userRef;
   List<Usertype> users = List();
-  String uid;
   Usertype user;
   SharedPreferences preferences;
   bool loading = true;
-  bool isLoggedin = false;
   String _selectedItem = 'admin';
 
   String email = '';
@@ -39,7 +38,6 @@ class _SignInPageState extends State<SignInPage> {
   final textStyle = new TextStyle(fontSize: 16, color: Colors.black);
   bool _toggleVisibility = true;
   final _formKey = GlobalKey<FormState>();
-  DatabaseReference databaseRef;
 
   Widget _buildEmailField() {
     return Material(
@@ -119,12 +117,12 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   void initState() {
-    final FirebaseDatabase database = FirebaseDatabase();
     super.initState();
     user = Usertype('', 'admin');
-    databaseRef = database.reference().child('users');
-    databaseRef.onChildAdded.listen(_onEntryAdded);
-    databaseRef.onChildChanged.listen(_onEntryChanged);
+    final FirebaseDatabase database = FirebaseDatabase();
+    userRef = database.reference().child('users');
+    userRef.onChildAdded.listen(_onEntryAdded);
+    userRef.onChildChanged.listen(_onEntryChanged);
   }
 
   @override
@@ -219,6 +217,11 @@ class _SignInPageState extends State<SignInPage> {
                 ],
               ),
             ),
+            RaisedButton(
+              onPressed: () {
+                print(users.length);
+              },
+            ),
             InkWell(
               onTap: () async {
                 print(email);
@@ -307,22 +310,26 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  // Future signIn() async {
-  //   AuthResult authResult = await firebaseAuth.signInWithEmailAndPassword(
-  //       email: email, password: password);
-  //   if (authResult != null) {
-  //     FirebaseUser firebaseUser = authResult.user;
+  Future signIn() async {
+    AuthResult authResult = await firebaseAuth.signInWithEmailAndPassword(
+        email: email, password: password).catchError(print);
+    if (authResult != null) {
+      FirebaseUser firebaseUser = authResult.user;
 
-  //     await preferences.setString('id', firebaseUser.uid);
-  //     await preferences.setString('username', firebaseUser.displayName);
-  //     await preferences.setString('photoUrl', firebaseUser.photoUrl);
-  //     Fluttertoast.showToast(
-  //         msg: "Login was successful ${firebaseUser.displayName}");
-  //     Navigator.push(context, MaterialPageRoute(builder: (_) {
-  //       return MainScreen(firebaseUser);
-  //     }));
-  //   }
-  // }
+      await preferences.setString('id', firebaseUser.uid);
+      await preferences.setString('username', firebaseUser.displayName);
+      await preferences.setString('photoUrl', firebaseUser.photoUrl);
+      Fluttertoast.showToast(
+          msg: "Login was successful ${firebaseUser.displayName}");
+      Navigator.push(context, MaterialPageRoute(builder: (_) {
+        return MainScreen(firebaseUser);
+      }));
+    }
+    else{
+      
+      
+    }
+  }
 
   Future handleSignIn() async {
     preferences = await SharedPreferences.getInstance();
@@ -370,31 +377,36 @@ class _SignInPageState extends State<SignInPage> {
       setState(() {
         user.id = firebaseUser.uid;
       });
-      for (int i = 0; i < users.length; i++) {
-        if (users[i].id == firebaseUser.uid) {
-          Fluttertoast.showToast(
-              msg: "Login was successful ${firebaseUser.displayName}");
-
-          // FirebaseDatabase.instance
-          //     .reference()
-          //     .child('messages')
-          //     .child(firebaseUser.uid)
-          //     .once();
-          if (users[i].usertype == 'user')
-            Navigator.push(context, MaterialPageRoute(builder: (_) {
-              return MainScreen(firebaseUser);
-            }));
-          else if (users[i].usertype == 'business')
-            Navigator.push(context, MaterialPageRoute(builder: (_) {
-              return BusinessHomePage(firebaseUser);
-            }));
-          else
-            Navigator.push(context, MaterialPageRoute(builder: (_) {
-              return AdminHomePage(firebaseUser);
-            }));
+      Fluttertoast.showToast(
+          msg: "Login was successful ${firebaseUser.displayName}");
+      if (users == null)
+        setUsertype(firebaseUser);
+      else
+        for (int i = 0; i < users.length; i++) {
+          if (users[i].id == firebaseUser.uid) {
+            await preferences.setString('usertype', user.usertype);
+            setState(() {
+              user.usertype = users[i].usertype;
+            });
+            // FirebaseDatabase.instance
+            //     .reference()
+            //     .child('messages')
+            //     .child(firebaseUser.uid)
+            //     .once();
+            if (users[i].usertype == 'user')
+              Navigator.push(context, MaterialPageRoute(builder: (_) {
+                return MainScreen(firebaseUser);
+              }));
+            else if (users[i].usertype == 'business')
+              Navigator.push(context, MaterialPageRoute(builder: (_) {
+                return BusinessHomePage(firebaseUser);
+              }));
+            else
+              Navigator.push(context, MaterialPageRoute(builder: (_) {
+                return AdminHomePage(firebaseUser);
+              }));
+          }
         }
-      }
-      setUsertype(firebaseUser);
 
       //getEmail(firebaseUser);
 
@@ -406,7 +418,7 @@ class _SignInPageState extends State<SignInPage> {
 
   setUsertype(FirebaseUser firebaseUser) async {
     // usertype = Usertype('', '');itemRef.push().set(item.toJson());
-    databaseRef.push().set(user.toJson());
+    userRef.push().set(user.toJson());
     if (user.usertype == 'user')
       Navigator.push(context, MaterialPageRoute(builder: (_) {
         return MainScreen(firebaseUser);
@@ -421,9 +433,8 @@ class _SignInPageState extends State<SignInPage> {
       }));
   }
 
-
   void _onEntryAdded(Event event) {
-    users.add(Usertype.fromSnapShot(event.snapshot));
+    users.add(Usertype.fromSnapshot(event.snapshot));
   }
 
   void _onEntryChanged(Event event) {}

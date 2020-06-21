@@ -1,10 +1,7 @@
-import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_database/ui/firebase_animated_list.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mechanicadmin/business/businesshome.dart';
 import 'package:mechanicadmin/signin.dart';
 import 'package:mechanicadmin/user/pages/mainscreen.dart';
@@ -14,9 +11,6 @@ import 'admin/adminhome.dart';
 import 'user/models/usertype.dart';
 
 class SignUpPage extends StatefulWidget {
-  SignUpPage({this.app});
-  final FirebaseApp app;
-
   @override
   _SignUpPageState createState() => _SignUpPageState();
 }
@@ -24,9 +18,6 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   String _selectedItem = 'user';
 
-  DatabaseReference _messagesRef;
-  StreamSubscription<Event> _counterSubscription;
-  StreamSubscription<Event> _messagesSubscription;
   bool _anchorToBottom = false;
   TextEditingController usernameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
@@ -42,40 +33,14 @@ class _SignUpPageState extends State<SignUpPage> {
     final FirebaseDatabase database = FirebaseDatabase();
     usertype = Usertype('', 'admin');
     databaseRef = database.reference().child('users');
-
-
-    // final FirebaseDatabase database = FirebaseDatabase(app: widget.app);
-    _messagesRef = database.reference().child('messages');
-    database.reference().child('counter').once().then((DataSnapshot snapshot) {
-      Fluttertoast.showToast(
-          msg: 'Connected to second database and read ${snapshot.value}');
-    });
-    // database.setPersistenceEnabled(true);
-    // database.setPersistenceCacheSizeBytes(10000000);
-    // _counterRef.keepSynced(true);
-    // _counterSubscription = _counterRef.onValue.listen((Event event) {
-    //   setState(() {
-    //     _counter = event.snapshot.value ?? 0;
-    //   });
-    // }, onError: (Object o) {
-    //   setState(() {});
-    // });
-    // _messagesSubscription =
-    //     _messagesRef.limitToLast(10).onChildAdded.listen((Event event) {
-    //   print('Child added: ${event.snapshot.value}');
-    // }, onError: (Object o) {
-    //   final DatabaseError error = o;
-    //   print('Error: ${error.code} ${error.message}');
-    // });
   }
 
   @override
   void dispose() {
     super.dispose();
-    _messagesSubscription.cancel();
-    _counterSubscription.cancel();
+    // _messagesSubscription.cancel();
+    // _counterSubscription.cancel();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +72,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       controller: usernameController,
                       validator: (v) {
                         if (v.isEmpty) return 'username cannot be empty';
-                        return '';
+                        return null;
                       },
                     ),
                   ),
@@ -185,7 +150,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     height: 20,
                   ),
                   RaisedButton(
-                    //color: Colors.transparent,
+                    color: Colors.transparent,
                     child: Container(
                         width: double.infinity,
                         height: 50,
@@ -195,31 +160,22 @@ class _SignUpPageState extends State<SignUpPage> {
                         child: Center(child: Text('submit'))),
                     onPressed: () {
                       // print(_selectedItem);
-                      if (_formKey.currentState.validate()) {
-                        print('$_selectedItem');
-                        FirebaseAuth.instance
-                            .createUserWithEmailAndPassword(
-                                email: emailController.text,
-                                password: passwordController.text)
-                            .then((value) {
-                          setState(() {
-                            firebaseUser = value.user;
-                          });
+                      //if (_formKey.currentState.validate()) {
+                      //print('$_selectedItem');
+                      FirebaseAuth.instance
+                          .createUserWithEmailAndPassword(
+                              email: emailController.text,
+                              password: passwordController.text)
+                          .then((value) {
+                        setState(() {
+                          firebaseUser = value.user;
                         });
-                        usertype.usertype=_selectedItem;
-                        usertype.id=firebaseUser.uid;
-                        // _increment(<String, String>{
-                        //   'username': '${usernameController.text}',
-                        //   'email': '${emailController.text}',
-                        //   'id': '$_counter',
-                        //   'usertype': '$_selectedItem'
-                        // });
-                        setUsertype(firebaseUser);
+                      });
+                      usertype.usertype = _selectedItem;
+                      usertype.id = firebaseUser.uid;
+                      setUsertype(firebaseUser);
 
-                        Navigator.push(context, MaterialPageRoute(builder: (_) {
-                          return MainScreen(firebaseUser);
-                        }));
-                      }
+                      // }
                     },
                   ),
                   MaterialButton(
@@ -248,39 +204,38 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             title: const Text('Anchor to bottom'),
           ),
-          Flexible(
-            child: FirebaseAnimatedList(
-              key: ValueKey<bool>(_anchorToBottom),
-              query: _messagesRef,
-              reverse: _anchorToBottom,
-              sort: _anchorToBottom
-                  ? (DataSnapshot a, DataSnapshot b) => b.key.compareTo(a.key)
-                  : null,
-              itemBuilder: (BuildContext context, DataSnapshot snapshot,
-                  Animation<double> animation, int index) {
-                return SizeTransition(
-                  sizeFactor: animation,
-                  child: ListTile(
-                    trailing: IconButton(
-                      onPressed: () =>
-                          _messagesRef.child(snapshot.key).remove(),
-                      icon: Icon(Icons.delete),
-                    ),
-                    title: Text(
-                      "$index: ${snapshot.value.toString()} ",
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+          // Flexible(
+          //   child: FirebaseAnimatedList(
+          //     key: ValueKey<bool>(_anchorToBottom),
+          //     query: _messagesRef,
+          //     reverse: _anchorToBottom,
+          //     sort: _anchorToBottom
+          //         ? (DataSnapshot a, DataSnapshot b) => b.key.compareTo(a.key)
+          //         : null,
+          //     itemBuilder: (BuildContext context, DataSnapshot snapshot,
+          //         Animation<double> animation, int index) {
+          //       return SizeTransition(
+          //         sizeFactor: animation,
+          //         child: ListTile(
+          //           trailing: IconButton(
+          //             onPressed: () =>
+          //                 _messagesRef.child(snapshot.key).remove(),
+          //             icon: Icon(Icons.delete),
+          //           ),
+          //           title: Text(
+          //             "$index: ${snapshot.value.toString()} ",
+          //           ),
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ),
         ],
       ),
     );
   }
 
   setUsertype(FirebaseUser firebaseUser) async {
-    // usertype = Usertype('', '');itemRef.push().set(item.toJson());
     databaseRef.push().set(usertype.toJson());
     if (usertype.usertype == 'firebaseUser')
       Navigator.push(context, MaterialPageRoute(builder: (_) {

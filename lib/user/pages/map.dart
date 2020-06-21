@@ -146,7 +146,8 @@ class _MapPageState extends State<MapPage> {
               CameraUpdate.newCameraPosition(
                 CameraPosition(
                   bearing: 270.0,
-                  target: LatLng(
+                  target: 
+                  LatLng(
                       widget.position.latitude, widget.position.longitude),
                   tilt: 30.0,
                   zoom: 18,

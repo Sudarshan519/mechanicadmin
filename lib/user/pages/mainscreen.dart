@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mechanicadmin/user/models/user.dart';
 import 'package:mechanicadmin/user/pages/homepage.dart';
 import 'package:mechanicadmin/user/pages/profile_page.dart';
 import 'package:mechanicadmin/user/pages/repairs.dart';
+import 'package:mechanicadmin/widgets/common.dart';
 
 class MainScreen extends StatefulWidget {
   final FirebaseUser user;
@@ -38,7 +38,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.white,
         body: currentPage,
         bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.transparent,
             elevation: 0.0,
             currentIndex: currentTabIndex,
             onTap: (int index) {
@@ -50,11 +50,11 @@ class _MainScreenState extends State<MainScreen> {
             type: BottomNavigationBarType.fixed,
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                  icon: Icon(Icons.home), title: Text("Home")),
+                  icon: Icon(Icons.home,color: Colors.blueGrey,), title: Text("Home",style: subtitle,)),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.build), title: Text("Repairs")),
+                  icon: Icon(Icons.build,color: Colors.blueGrey,), title: Text("Repairs",style: subtitle,)),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.person), title: Text("Profile")),
+                  icon: Icon(Icons.person,color: Colors.blueGrey), title: Text("Profile",style: subtitle,)),
             ]));
   }
 }

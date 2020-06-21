@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:mechanicadmin/admin/adminhome.dart';
+import 'package:mechanicadmin/business/businesshome.dart';
 import 'package:mechanicadmin/signin.dart';
 import 'package:mechanicadmin/user/pages/mainscreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,14 +12,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = new GoogleSignIn();
+  //String usertype = 'user';
   bool isLoggedin;
 
   SharedPreferences preferences;
-  isSignedIn(context) async {
+  isSignedIn(usertype, context) async {
     await FirebaseAuth.instance.currentUser().then((user) {
       if (user != null) {
-        return Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => MainScreen(user)));
+        if (usertype == 'user')
+          return Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => MainScreen(user)));
+        else if (usertype == 'admin')
+          return Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => AdminHomePage(user)));
+        else
+          return Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => BusinessHomePage(user)));
       } else
         return Navigator.of(context)
             .pushReplacement(MaterialPageRoute(builder: (_) => SignInPage()));
@@ -110,8 +120,8 @@ class AuthService {
         await preferences.setString('id', firebaseUser.uid);
         await preferences.setString('username', firebaseUser.displayName);
         await preferences.setString('photoUrl', firebaseUser.photoUrl);
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (_) => MainScreen(firebaseUser)));
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => MainScreen(firebaseUser)));
       } else {
         await preferences.setString('id', documents[0]['id']);
         await preferences.setString('username', documents[0]['displayName']);
@@ -175,7 +185,6 @@ class AuthService {
       await preferences.setString('id', null);
       await preferences.setString('username', null);
       await preferences.setString('photoUrl', null);
-      
     });
   }
 }

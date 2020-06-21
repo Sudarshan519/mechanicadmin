@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:mechanicadmin/services/authServices.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -9,11 +10,21 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  String usertype;
   @override
   void initState() {
     super.initState();
+    _load();
+    Timer(Duration(seconds: 1),
+        () => AuthService().isSignedIn(usertype, context));
+  }
 
-    Timer(Duration(seconds: 1), () => AuthService().isSignedIn(context));
+  _load() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String usertype = prefs.getString('usertype');
+    setState(() {
+      usertype = usertype;
+    });
   }
 
   @override
@@ -24,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
           //color: Colors.grey,
           image: DecorationImage(
               image: AssetImage(
-                'images/c.jpg',
+                'images/repair.jpg',
               ),
               fit: BoxFit.fill),
         ),

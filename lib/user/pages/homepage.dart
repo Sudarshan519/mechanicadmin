@@ -1,12 +1,9 @@
-import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:haversine/haversine.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mechanicadmin/admin/pages/signin.dart';
 import 'package:mechanicadmin/services/authServices.dart';
 import 'package:mechanicadmin/user/firebase/userServices.dart';
 import 'package:mechanicadmin/user/models/shop.dart';
@@ -14,7 +11,8 @@ import 'package:mechanicadmin/user/pages/map.dart';
 import 'package:mechanicadmin/user/pages/payment.dart';
 import 'package:mechanicadmin/user/pages/repairs.dart';
 import 'package:mechanicadmin/widgets/common.dart';
-import 'package:platform_maps_flutter/platform_maps_flutter.dart';
+
+import '../../signin.dart';
 
 class HomePage extends StatefulWidget {
   final FirebaseUser user;
@@ -26,29 +24,26 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   Position myPosition;
   bool isLoading = true;
-  String image = "images/a.jpg";
+  String image = 'images/a.jpg';
   List<Shop> shops;
   double distanceInMeters = 99999999;
-  BitmapDescriptor myicon;
-  BitmapDescriptor shopicon;
   bool carwashselected = false;
   bool request = false;
-  int selectedDistance = 1;
+  int selectedDistance;
   var arr = [];
   var raa = [];
 
   @override
   void initState() {
     super.initState();
-
     getshops();
-   // getLocation();
+    // getLocation();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         drawer: _buildDrawer(),
         body: SingleChildScrollView(
           child: Column(
@@ -59,7 +54,7 @@ class _HomePageState extends State<HomePage> {
                 children: <Widget>[
                   Container(
                       height: MediaQuery.of(context).size.height * .30,
-                      child: shops != null||myPosition!=null
+                      child: selectedDistance != null
                           ? MapPage(
                               myPosition, selectedDistance, request, shops)
                           : Center(child: CircularProgressIndicator())),
@@ -179,32 +174,35 @@ class _HomePageState extends State<HomePage> {
                       ),
                       Text(
                         'Repairs Shops Nearby',
-                        style: heading,
+                        style: appStyle.copyWith(color: Colors.blueGrey),
                       ),
                       Container(
                           height: MediaQuery.of(context).size.height * .27,
                           color: Colors.white,
                           child: shops != null
                               ? ListView.builder(
+                                  padding: EdgeInsets.all(0),
                                   scrollDirection: Axis.vertical,
                                   physics: BouncingScrollPhysics(),
                                   itemCount: shops.length,
                                   itemBuilder: (_, int i) {
-                                    return ListTile(
-                                      leading: Icon(
-                                        Icons.track_changes,
-                                        size: 40,
-                                      ),
-                                      title: Text(
-                                        '${shops[i].address}',
-                                        style: heading,
-                                      ),
-                                      subtitle: arr[i] != null
-                                          ? Text(
-                                              '${arr[i].toStringAsFixed(2)} m ahead',
-                                              style: subtitle,
-                                            )
-                                          : Text(''),
+                                    return Row(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.drive_eta,
+                                          size: 40,
+                                        ),
+                                        Text(
+                                          '${shops[i].address}',
+                                          style: heading,
+                                        ),
+                                        arr[i] != null
+                                            ? Text(
+                                                '${arr[i].toStringAsFixed(2)} m ahead',
+                                                style: subtitle,
+                                              )
+                                            : Text(''),
+                                      ],
                                     );
                                   },
                                 )
@@ -229,7 +227,7 @@ class _HomePageState extends State<HomePage> {
           for (int i = 0; i < 40; i++)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Icon(
                   Icons.local_car_wash,
@@ -237,8 +235,9 @@ class _HomePageState extends State<HomePage> {
                   color: Colors.blueGrey,
                 ),
                 Text(
-                  '$i m ahead',
-                  style: heading.copyWith(color: Colors.blueGrey),
+                  '$i\m \nahead  ',
+                  textAlign: TextAlign.center,
+                  style: subtitle.copyWith(color: Colors.blueGrey),
                 ),
               ],
             ),
@@ -294,9 +293,11 @@ class _HomePageState extends State<HomePage> {
             currentAccountPicture: InkWell(
               onTap: () => updateImage(),
               child: CircleAvatar(
-                backgroundImage: AssetImage(
-                  image,
-                ),
+                backgroundImage: image != null
+                    ? NetworkImage(widget.user.photoUrl)
+                    : AssetImage(
+                        image,
+                      ),
                 child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Icon(Icons.person_add)),
@@ -583,15 +584,13 @@ class _HomePageState extends State<HomePage> {
                         ],
                       );
                     });
+
                 setState(() {
                   request = true;
                 });
                 Fluttertoast.showToast(
                     msg: 'service currently unavailable for your region');
 
-                setState(() {
-                  request = false;
-                });
                 //Navigator.of(context).pop();
               },
             ),

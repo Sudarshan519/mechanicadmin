@@ -10,7 +10,7 @@ class Usertype {
     this.usertype,
   );
 
-  Usertype.fromSnapShot(DataSnapshot snapshot)
+  Usertype.fromSnapshot( DataSnapshot snapshot)
       : key = snapshot.key,
         id = snapshot.value['id'],
         usertype = snapshot.value['usertype'];

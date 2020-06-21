@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mechanicadmin/admin/db/mechanic.dart';
 import 'package:mechanicadmin/admin/db/shops.dart';
+import 'package:mechanicadmin/services/authServices.dart';
+
+import '../../signin.dart';
 
 enum Page { dashboard, manage }
 
@@ -303,6 +306,22 @@ class _AdminSiteState extends State<AdminSite> {
               title: Text('All Mechanics'),
             ),
             Divider(),
+            InkWell(
+              onTap: (){
+                AuthService().signOut();
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SignInPage(),
+                  ));
+              },
+                          child: Column(
+                children: <Widget>[
+                  Icon(Icons.lock_open),
+                  Text('Log out'),
+                ],
+              ),
+            )
           ],
         );
     }
