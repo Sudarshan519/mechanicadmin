@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mechanicadmin/user/models/mechanic.dart';
 import 'package:mechanicadmin/user/models/shop.dart';
 
 class ShopServices {
@@ -21,14 +22,16 @@ class ShopServices {
   }
 
   delBook(shop) async {
-    var ref = firestore.collection("Shop").document(shop.id);
+    var ref = firestore.collection("mechaniclist").document(shop.id);
 
     await ref.delete();
   }
 
-  Future<List<Shop>> getShops() async {
-    var data = await firestore.collection('Shop').getDocuments();
-    return data.documents.map<Shop>((da) => Shop.fromJson(da.data)).toList();
+  Future<List<Mechanic>> getShops() async {
+    var data = await firestore.collection('mechaniclist').getDocuments();
+    return data.documents
+        .map<Mechanic>((da) => Mechanic.fromJson(da.data))
+        .toList();
   }
 }
 

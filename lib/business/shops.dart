@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:mechanicadmin/services/authServices.dart';
+import 'package:mechanicadmin/user/database/userServices.dart';
+import 'package:mechanicadmin/user/models/mechanic.dart';
 //import 'package:image_picker/image_picker.dart';
-import 'package:mechanicadmin/user/firebase/userServices.dart';
 import 'package:mechanicadmin/user/models/shop.dart';
-import 'package:mechanicadmin/widgets/common.dart';
 import 'package:platform_maps_flutter/platform_maps_flutter.dart';
 
-import '../signin.dart';
 
 class AddShop extends StatefulWidget {
   // final Shop shop;
@@ -44,7 +42,7 @@ class _AddShopState extends State<AddShop> {
   var c = TextEditingController();
   bool istapped = false;
   var d = TextEditingController();
-  List<Shop> shops = [];
+  List<Mechanic> shops = [];
   LatLng tappedlocation;
   static Position position;
   PlatformMapController _mapController;
@@ -435,7 +433,7 @@ class _AddShopState extends State<AddShop> {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: <Widget>[
                                       Text(
-                                        shops[i].shopName.toUpperCase(),
+                                        shops[i].mechnicname.toUpperCase(),
                                         overflow: TextOverflow.clip,
                                         style: TextStyle(
                                             fontSize: 20,
@@ -446,7 +444,7 @@ class _AddShopState extends State<AddShop> {
                                         shops[i].address,
                                         style: appStyle,
                                       ),
-                                      Text('${shops[i].shopName}'),
+                                      Text('${shops[i].mechnicname}'),
                                       SizedBox(
                                         height: 10,
                                       ),

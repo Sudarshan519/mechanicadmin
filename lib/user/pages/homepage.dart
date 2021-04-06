@@ -5,9 +5,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:haversine/haversine.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mechanicadmin/services/authServices.dart';
-import 'package:mechanicadmin/user/firebase/userServices.dart';
+import 'package:mechanicadmin/user/database/userServices.dart';
+import 'package:mechanicadmin/user/models/mechanic.dart';
 import 'package:mechanicadmin/user/models/shop.dart';
-import 'package:mechanicadmin/user/pages/map.dart';
 import 'package:mechanicadmin/user/pages/payment.dart';
 import 'package:mechanicadmin/user/pages/repairs.dart';
 import 'package:mechanicadmin/widgets/common.dart';
@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
   Position myPosition;
   bool isLoading = true;
   String image = 'images/a.jpg';
-  List<Shop> shops;
+  List<Mechanic> shops;
   double distanceInMeters = 99999999;
   bool carwashselected = false;
   bool request = false;
@@ -53,11 +53,12 @@ class _HomePageState extends State<HomePage> {
               Stack(
                 children: <Widget>[
                   Container(
-                      height: MediaQuery.of(context).size.height * .30,
-                      child: selectedDistance != null
-                          ? MapPage(
-                              myPosition, selectedDistance, request, shops)
-                          : Center(child: CircularProgressIndicator())),
+                    height: MediaQuery.of(context).size.height * .30,
+                    // child: selectedDistance != null
+                    //     ? MapPage(
+                    //         myPosition, selectedDistance, request, shops)
+                    //     : Center(child: CircularProgressIndicator())
+                  ),
                   Padding(
                     padding:
                         const EdgeInsets.only(top: 50, left: 50, right: 80),
@@ -285,7 +286,7 @@ class _HomePageState extends State<HomePage> {
         children: <Widget>[
           UserAccountsDrawerHeader(
             accountName: Text(
-              widget.user.displayName,
+              widget.user.displayName != null ? widget.user.displayName : '',
               style: title.copyWith(color: Colors.white),
             ),
             accountEmail: Text(widget.user.email,
@@ -294,7 +295,7 @@ class _HomePageState extends State<HomePage> {
               onTap: () => updateImage(),
               child: CircleAvatar(
                 backgroundImage: image != null
-                    ? NetworkImage(widget.user.photoUrl)
+                    ? NetworkImage(widget.user.photoUrl ?? '')
                     : AssetImage(
                         image,
                       ),
@@ -372,11 +373,11 @@ class _HomePageState extends State<HomePage> {
     //final harvesine =
     for (int i = 0; i != shops.length; i++) {
       double distance = new Haversine.fromDegrees(
-              latitude1: myPosition.latitude,
-              longitude1: myPosition.longitude,
-              latitude2: shops[i].latitude,
-              longitude2: shops[i].longitude)
-          .distance();
+        latitude1: myPosition.latitude,
+        longitude1: myPosition.longitude,
+        // latitude2: shops[i].latitude,
+        // longitude2: shops[i].longitude
+      ).distance();
       setState(() {
         arr.length = shops.length;
         arr[i] = distance;

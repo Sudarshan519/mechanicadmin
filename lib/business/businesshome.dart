@@ -29,8 +29,9 @@ class _BusinessHomePageState extends State<BusinessHomePage> {
             children: <Widget>[
               UserAccountsDrawerHeader(
                 decoration: BoxDecoration(color: Colors.green),
-                accountName:
-                    widget.user != null ? Text(widget.user.displayName) : null,
+                accountName: widget.user != null
+                    ? Text(widget.user.displayName ?? '')
+                    : null,
                 accountEmail:
                     widget.user != null ? Text(widget.user.email) : Text(''),
                 currentAccountPicture: InkWell(

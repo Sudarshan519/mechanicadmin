@@ -32,7 +32,6 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          //color: Colors.grey,
           image: DecorationImage(
               image: AssetImage(
                 'images/repair.jpg',
@@ -67,7 +66,6 @@ class _SplashScreenState extends State<SplashScreen> {
             CircularProgressIndicator()
           ],
         ),
-        //color:Colors.grey
       ),
     );
   }

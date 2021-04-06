@@ -3,8 +3,8 @@ import 'package:geolocator/geolocator.dart';
 class Mechanic {
   String id;
   String mechnicname;
-  String latitude;
-  String longitude;
+  double latitude;
+  double longitude;
   String address;
   Position mechanicposition;
 
@@ -13,8 +13,8 @@ class Mechanic {
     return Mechanic(
       json['id'] as String,
       json['shop_name'] as String,
-      json['latitude'] as String,
-      json['longitude'] as String,
+      json['latitude'] as double,
+      json['longitude'] as double,
       json['address'] as String,
     );
   }
